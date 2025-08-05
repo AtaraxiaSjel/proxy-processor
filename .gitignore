@@ -1,0 +1,7 @@
+.env
+.pre-commit-config.yaml
+/target
+/result*
+/.vscode
+/.devenv
+/.direnv
