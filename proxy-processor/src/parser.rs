@@ -29,14 +29,13 @@ pub fn parse_proxy(link: &str) -> Result<Proxy, ProcessorError> {
             // "h2" => ProxyType::Hysteria2,
             _ => return Err(ProcessorError::UnsupportedProtocol(scheme.to_string())),
         };
-        trace!(proxy_type = ?proxy_type, "parsed proxy type");
+        trace!(?proxy_type, "parsed proxy type");
 
         let (data, _) = if !data.contains('@') {
             decode_base64(data)?
         } else {
             (data.to_string(), "".to_string())
         };
-        trace!(data = %data, "data parsed");
 
         if proxy_type != ProxyType::Vmess {
             let link = format!("{scheme}://{data}");
@@ -53,9 +52,6 @@ pub fn parse_proxy(link: &str) -> Result<Proxy, ProcessorError> {
             let remarks = url
                 .fragment()
                 .map(|x| urlencoding::decode(x).unwrap_or_default().into_owned());
-
-            dbg!(&url);
-            dbg!(&params);
 
             match proxy_type {
                 ProxyType::Vless => {
@@ -82,6 +78,7 @@ pub fn parse_proxy(link: &str) -> Result<Proxy, ProcessorError> {
                         remarks,
                         proxy_type: ProxyType::Vless,
                         details,
+                        geoip: None,
                     })
                 }
                 ProxyType::Shadowsocks => {
@@ -103,6 +100,7 @@ pub fn parse_proxy(link: &str) -> Result<Proxy, ProcessorError> {
                         remarks,
                         proxy_type: ProxyType::Shadowsocks,
                         details: ProxyDetails::Shadowsocks { method, password },
+                        geoip: None,
                     })
                 }
                 ProxyType::ShadowsocksR => unimplemented!(),
@@ -160,19 +158,17 @@ fn parse_transport_settings(
             .get("path")
             .map(String::from)
             .unwrap_or("/".to_string());
-        let method = params
-            .get("method")
-            .map(String::from)
-            .unwrap_or("GET".to_string());
+        let method = params.get("method").map(String::from).unwrap_or_default();
         TransportSettings::Http { host, path, method }
     };
 
     match params.get("type").map(|s| s.as_str()) {
+        Some("quic") => Ok(TransportSettings::Quic),
         Some("grpc") => Ok(TransportSettings::Grpc {
             service_name: params
                 .get("serviceName")
-                .ok_or(ProcessorError::MissingComponent("serviceName"))?
-                .to_string(),
+                .map(String::from)
+                .unwrap_or_default(),
         }),
         Some("ws") => Ok(TransportSettings::WebSocket {
             path: params
@@ -181,7 +177,16 @@ fn parse_transport_settings(
                 .to_string(),
         }),
         Some("http") => Ok(parse_http(params)),
-        Some("quic") => Ok(TransportSettings::Quic),
+        Some("httpupgrade") => {
+            let host = params
+                .get("host")
+                .map(|s| s.split(',').map(String::from).collect());
+            let path = params
+                .get("path")
+                .map(String::from)
+                .unwrap_or("/".to_string());
+            Ok(TransportSettings::HttpUpgrade { host, path })
+        }
         Some("tcp") => {
             if params.get("headerType").map(|s| s.as_str()) == Some("http") {
                 Ok(parse_http(params))
@@ -225,8 +230,9 @@ fn decode_base64(input: &str) -> Result<(String, String), ProcessorError> {
         if let Ok(decoded_data) = general_purpose::URL_SAFE_NO_PAD.decode(candidate) {
             let garbage_suffix_start = start_index + candidate.len();
             let garbage_suffix = input[garbage_suffix_start..].to_string();
-            let data = String::from_utf8(decoded_data)
-                .map_err(|_| ProcessorError::Base64DecodeFailed(input.to_string()))?;
+            let data = String::from_utf8(decoded_data).map_err(|_| {
+                ProcessorError::Base64DecodeFailed("invalid utf-8 sequence".to_string())
+            })?;
             return Ok((data, garbage_suffix));
         }
 

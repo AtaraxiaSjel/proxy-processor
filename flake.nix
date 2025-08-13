@@ -43,7 +43,9 @@
           nativeBuildInputs = with pkgs; [
             mold
           ];
-          buildInputs = with pkgs; [ ];
+          buildInputs = with pkgs; [
+            openssl
+          ];
         in
         {
           _module.args.pkgs = import inputs.nixpkgs {
@@ -60,12 +62,13 @@
 
             name = "proxy-processor-devenv";
             env = {
-              RUST_LOG = "trace";
+              RUST_LOG = "debug,maxminddb::decoder=warn";
             };
             packages =
               with pkgs;
               [
                 cargo-audit
+                cargo-flamegraph
                 cargo-machete
                 cargo-nextest
                 nixfmt-rfc-style

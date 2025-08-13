@@ -5,7 +5,10 @@ edition = "2024"
 
 [dependencies]
 base64 = "0.22.1"
+constcat = "0.6.1"
 dns-lookup = "2.1.0"
+hickory-resolver = "0.25.2"
+itertools = "0.14.0"
 maxminddb = "0.26.0"
 rayon = "1.10.0"
 serde = { version = "1.0.219", features = ["derive"] }

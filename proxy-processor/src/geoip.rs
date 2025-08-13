@@ -1,7 +1,8 @@
 use crate::error::ProcessorError;
-use maxminddb::Reader;
+use maxminddb::{Reader, geoip2};
 use std::net::IpAddr;
 use std::sync::Arc;
+use tracing::{instrument, trace};
 
 #[derive(Clone)]
 pub struct GeoIpReader {
@@ -17,9 +18,16 @@ impl GeoIpReader {
         })
     }
 
-    pub fn lookup_country_iso(&self, ip: IpAddr) -> Result<Option<String>, ProcessorError> {
+    #[instrument(skip(self))]
+    pub fn lookup_country_info(
+        &self,
+        ip: IpAddr,
+    ) -> Result<Option<geoip2::country::Country>, ProcessorError> {
+        trace!(?ip, "lookup ip address in maxmind db");
         self.reader
-            .lookup(ip)
+            .lookup::<geoip2::Country>(ip)
+            .map(|country| country.and_then(|c| c.country))
             .map_err(|err| ProcessorError::GeoIpDbError(err.to_string()))
+            .inspect(|geo| trace!(?geo, "looked up geoip"))
     }
 }

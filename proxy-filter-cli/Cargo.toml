@@ -4,6 +4,13 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+anyhow = "1.0.98"
 clap = { version = "4.5.42", features = ["derive"] }
+either = "1.15.0"
 proxy-processor = { path = "../proxy-processor" }
+rayon = "1.10.0"
+reqwest = { version = "0.12.22", features = ["blocking"] }
+serde_json = "1.0.142"
+tempfile = "3.20.0"
 tokio = { version = "1.47.1", features = ["full"] }
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }

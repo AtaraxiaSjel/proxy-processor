@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, Clone, PartialEq, Eq, Hash)]
 pub enum ProcessorError {
     #[error("Unsupported protocol: {0}")]
     UnsupportedProtocol(String),

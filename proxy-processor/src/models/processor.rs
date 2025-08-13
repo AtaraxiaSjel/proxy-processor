@@ -3,7 +3,7 @@ use std::fmt;
 use std::str::FromStr;
 use thiserror::Error;
 
-#[derive(Debug, PartialEq, Eq, Hash, Clone, Copy, Deserialize, Serialize)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Deserialize, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum ProxyType {
     Vmess,
@@ -47,7 +47,7 @@ impl FromStr for ProxyType {
     }
 }
 
-#[derive(Debug, Clone, Default, Serialize)]
+#[derive(Debug, Clone, Default, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct TlsSettings {
     pub enabled: bool,
     pub server_name: Option<String>,
@@ -56,14 +56,14 @@ pub struct TlsSettings {
     pub reality: Option<RealitySettings>,
 }
 
-#[derive(Debug, Clone, Default, Serialize)]
+#[derive(Debug, Clone, Default, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct RealitySettings {
     pub enabled: bool,
     pub public_key: String,
     pub short_id: String,
 }
 
-#[derive(Debug, Clone, Default, Serialize)]
+#[derive(Debug, Clone, Default, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(rename_all = "lowercase")]
 pub enum TransportSettings {
     Grpc {
@@ -73,7 +73,10 @@ pub enum TransportSettings {
         host: Option<Vec<String>>,
         path: String,
         method: String,
-        // headers: HashMap<String, String>,
+    },
+    HttpUpgrade {
+        host: Option<Vec<String>>,
+        path: String,
     },
     Quic,
     #[default]
@@ -83,7 +86,7 @@ pub enum TransportSettings {
     },
 }
 
-#[derive(Debug, Clone, Default, Serialize)]
+#[derive(Debug, Clone, Default, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(rename_all = "lowercase")]
 pub enum ProxyDetails {
     #[default]
@@ -110,7 +113,7 @@ pub enum ProxyDetails {
     },
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Proxy {
     pub original_link: String,
     pub address: String,
@@ -118,25 +121,34 @@ pub struct Proxy {
     pub remarks: Option<String>,
     pub proxy_type: ProxyType,
     pub details: ProxyDetails,
+    pub geoip: Option<GeoIpInfo>,
+}
+
+#[derive(Debug, Clone, Serialize, PartialEq, Eq, PartialOrd, Ord)]
+pub struct GeoIpInfo {
+    pub is_in_eu: bool,
+    pub iso_code: String,
+    pub name: Option<String>,
 }
 
 #[derive(Debug, Default)]
 pub struct FilterOptions {
     pub proxy_types: Option<Vec<ProxyType>>,
-    pub country_codes: Option<Vec<String>>,
+    pub include_countries: Option<Vec<String>>,
+    pub exclude_countries: Option<Vec<String>>,
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct VmessBase64Config {
-    #[serde(rename = "ps")]
-    pub remarks: String,
-    #[serde(rename = "add")]
-    pub address: String,
-    pub port: u16,
-    pub id: String,
-    pub net: String,
-    #[serde(rename = "type")]
-    pub header_type: String,
-    pub tls: String,
-}
+// #[derive(Debug, Deserialize)]
+// #[serde(rename_all = "camelCase")]
+// pub struct VmessBase64Config {
+//     #[serde(rename = "ps")]
+//     pub remarks: String,
+//     #[serde(rename = "add")]
+//     pub address: String,
+//     pub port: u16,
+//     pub id: String,
+//     pub net: String,
+//     #[serde(rename = "type")]
+//     pub header_type: String,
+//     pub tls: String,
+// }
