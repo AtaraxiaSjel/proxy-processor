@@ -53,6 +53,11 @@
             overlays = [ inputs.fenix.overlays.default ];
           };
 
+          packages = rec {
+            default = proxy-filter-cli;
+            proxy-filter-cli = pkgs.callPackage ./default.nix { };
+          };
+
           devenv.shells.default = {
             devenv.root =
               let
