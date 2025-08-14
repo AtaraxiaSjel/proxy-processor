@@ -1,0 +1,11 @@
+# Exclude everything
+/**
+
+# Include only necessary dirs and files
+!/Dockerfile
+!/proxy-filter-cli
+!/proxy-filter-cli/**
+!/proxy-processor
+!/proxy-processor/**
+!/Cargo.toml
+!/Cargo.lock

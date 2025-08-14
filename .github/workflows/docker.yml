@@ -1,0 +1,36 @@
+name: Build docker image
+
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - Dockerfile
+  workflow_dispatch:
+
+jobs:
+  build_and_test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+      - name: Extract package version
+        id: meta
+        run: echo "version=$(grep -E '^version\s*=' proxy-filter-cli/Cargo.toml | awk -F '"' '{print $2}')" >> "$GITHUB_OUTPUT"
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ataraxiadev
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build Docker Container
+        id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          tags: |
+            ataraxiadev/proxy-processor:${{ steps.meta.outputs.version }}
+            ataraxiadev/proxy-processor:latest
+          push: true
