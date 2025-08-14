@@ -81,7 +81,13 @@ fn main() -> Result<(), anyhow::Error> {
         include_countries: include,
         proxy_types: args.proxy_types,
     };
-    let geoip_reader = GeoIpReader::new(&args.geoip_db)?;
+
+    let geoip_reader = if let Ok(download_url) = Url::parse(&args.geoip_db) {
+        let response = reqwest::blocking::get(download_url)?;
+        GeoIpReader::from_bytes(response.bytes()?)?
+    } else {
+        GeoIpReader::from_path(&args.geoip_db)?
+    };
 
     let proxy_list = if let Ok(download_url) = Url::parse(&args.input) {
         let response = reqwest::blocking::get(download_url)?;
