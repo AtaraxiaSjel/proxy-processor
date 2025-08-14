@@ -1,7 +1,19 @@
-.env
-.pre-commit-config.yaml
-/target
-/result*
-/.vscode
-/.devenv
-/.direnv
+# Exclude everything
+/**
+
+# Include only necessary dirs and files
+!/.dockerignore
+!/.envrc
+!/.github
+!/.github/**
+!/Dockerfile
+!/proxy-filter-cli
+!/proxy-filter-cli/**
+!/proxy-processor
+!/proxy-processor/**
+!/Cargo.toml
+!/Cargo.lock
+!/default.nix
+!/flake.nix
+!/flake.lock
+!/LICENSE*
