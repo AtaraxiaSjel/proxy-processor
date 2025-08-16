@@ -1160,7 +1160,7 @@ dependencies = [
 
 [[package]]
 name = "proxy-filter-cli"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -1171,7 +1171,7 @@ dependencies = [
 
 [[package]]
 name = "proxy-processor"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "base64",
  "dns-lookup",
