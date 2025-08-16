@@ -230,7 +230,7 @@ impl Exporter for SingBoxExporter {
             ProxyType::Vless => {
                 if let ProxyDetails::Vless {
                     uuid,
-                    flow,
+                    flow: _,
                     tls,
                     transport,
                 } = &proxy.details
@@ -238,9 +238,9 @@ impl Exporter for SingBoxExporter {
                     obj.insert("type".to_string(), "vless".into());
                     obj.insert("uuid".to_string(), uuid.clone().into());
                     obj.insert("packet_encoding".to_string(), "xudp".into());
-                    if let Some(f) = flow {
-                        obj.insert("flow".to_string(), f.clone().into());
-                    }
+                    // if let Some(f) = flow {
+                    //     obj.insert("flow".to_string(), f.clone().into());
+                    // }
                     if tls.enabled {
                         obj.insert("tls".to_string(), Self::format_tls(tls)?);
                     }
