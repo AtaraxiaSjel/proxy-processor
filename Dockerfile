@@ -1,4 +1,4 @@
-FROM rust:1.89-alpine as builder
+FROM rust:1.90-alpine as builder
 WORKDIR /usr/src/proxy-processor
 COPY . .
 RUN apk add --no-cache musl-dev openssl-dev openssl-libs-static
