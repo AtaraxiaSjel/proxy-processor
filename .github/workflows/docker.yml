@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Extract package version
         id: meta
         run: echo "version=$(grep -E '^version\s*=' proxy-filter-cli/Cargo.toml | awk -F '"' '{print $2}')" >> "$GITHUB_OUTPUT"
